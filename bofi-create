@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Exit if there is an unbound variable or an error
+set -o nounset
+set -o errexit
+
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+device=${1}
+size=${2}
+
+showUsage() {
+	cat <<- EOF
+    Script to wipe and create multiboot usb :
+	    Example: sudo $scripname /dev/sdb 5G
+	EOF
+}
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+if [[ -z "$device" ]] ; then
+    showUsage
+    exit 2
+fi
+
+if [[ -z "$size" ]] ; then
+    size=4G
+fi
+
+pushd "$scriptdir"
+    ./makeUSB.sh $device vfat $size
+    parted $device set 1 boot on
+popd
