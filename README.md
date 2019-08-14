@@ -1,3 +1,16 @@
+Temporary fork of Multiboot USB from @aguslr. Please send PRs to the `incoming` branch. New name from @ZeTriUm ( https://github.com/aguslr/multibootusb/issues/194#issuecomment-362160176 ).
+
+Ready:
+
+* forked because inactive
+* merged all PRs from cntributors
+* fix gentoo support
+
+TODO:
+
+* add NixOS/GuixSD support
+
+
 # Multiboot USB
 
 <https://mbusb.aguslr.com/>
