@@ -3,12 +3,13 @@ Temporary fork of Multiboot USB from @aguslr. Please send PRs to the `incoming` 
 Ready:
 
 * forked because inactive
-* merged all PRs from cntributors
-* fix gentoo support
+* merged all PRs from contrubutors
+* fixed and test Gentoo support from https://github.com/aguslr/multibootusb/issues/258
 
 TODO:
 
-* add NixOS/GuixSD support
+* support NixOS/GuixSD
+* merge `incoming` to `master`
 
 
 # Multiboot USB
