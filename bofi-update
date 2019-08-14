@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+scriptname=$(basename "$0")
+mntpoint="${1}"
+
+showUsage() {
+	cat <<- EOF
+	Script to update mounted multiboot usb
+	    Usage: sudo $scriptname mount/point
+	EOF
+}
+
+if [ "$EUID" -ne 0 ] ; then 
+    echo "Please run as root"
+    exit 1
+fi
+
+if [[ -z "$mntpoint" ]] ; then
+    showUsage
+    exit 2
+fi
+
+if [ ! -d "$mntpoint" ] ; then
+    echo "Mount point should be exists"
+    exit 3
+fi
+
+if [ ! -d "$mntpoint"/boot/grub ] ; then
+    echo "Directory should have boot/grub installed"
+    exit 4
+fi
+
+pushd "$scriptdir"
+    cp -f mbusb.cfg "$mntpoint"/boot/grub/mbusb.cfg
+    rm -rf "$mntpoint"/boot/grub/mbusb.d
+    cp -r mbusb.d "$mntpoint"/boot/grub/ 
+popd
+
