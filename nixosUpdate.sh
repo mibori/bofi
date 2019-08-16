@@ -4,6 +4,8 @@
 [ "$BASH" ] && \
     export PS4='    +\t $BASH_SOURCE:$LINENO: ${FUNCNAME[0]:+${FUNCNAME[0]}():}'
 
+mntpoint="${1}"
+
 # Exit if there is an unbound variable or an error
 set -o nounset
 set -o errexit
@@ -11,7 +13,6 @@ set -o errexit
 
 scriptname=$(basename "$0")
 scriptname="${0}"
-mntpoint="${1}"
 
 # Show usage
 showUsage() {
