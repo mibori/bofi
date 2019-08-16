@@ -37,30 +37,73 @@ if [ ! -d "$mntpoint"/boot/grub ] ; then
     exit 4
 fi
 
+isosHub=~/isomounts
 
 generated="$mntpoint"/boot/grub/mbusb.d/nixos-generated.d
 rm -rf "$generated"
 mkdir -p "$generated"
 
 createConfig() {
-    configname="$1"
-cat <<EOCFG > "$generated"/"$configname".cfg  
-for isofile in \$isopath/$configname; do
+    configName="$1"
+
+
+cat <<HEADER > "$generated"/"$configName".cfg  
+for isofile in \$isopath/$configName; do
   if [ -e "\$isofile" ]; then
     regexp --set=isoname "\$isopath/(.*)" "\$isofile"
     submenu "\$isoname ->" "\$isofile" {
       iso_path="\$2"
       loopback loop "\$iso_path"
       root=(loop)
-      menuentry "NixOS Installer" {
-        bootoptions="init=/nix/store/vld9s6ywaicbflahjdgrxw9glngfd212-nixos-system-nixos-19.03.173279.878531fbdbb/init root=LABEL=NIXOS_ISO boot.shell_on_fail loglevel=4"
-        linux /boot/bzImage \$bootoptions
-        initrd /boot/initrd
-      }
+HEADER
+
+    while read p; do # iterate menu items
+        case "$p" in
+            "MENU LABEL "*)
+                menuEntryName=$(echo "$p" | sed -e 's/^MENU LABEL //')
+                initrdField=""
+
+                while read m; do # iterate fields
+                    case "$m" in
+                        'LINUX '*)
+                            echo 'LINUX FIELD SHOULD BE PROCESSED - '$m
+                            linuxField=$(echo "$m" | sed -e 's/^LINUX //')
+                            ;;
+                        'APPEND '*)
+                            echo 'APPEND FIELD SHOULD BE PROCESSED -'$m
+                            appendField=$(echo "$m" | sed -e 's/^APPEND //')
+                            ;;
+                        'INITRD '*)
+                            echo 'INITRD FIELD SHOULD BE PROCESSED -'$m
+                            initrdField=$(echo "$m" | sed -e 's/^INITRD //')
+                            ;;
+                        '')
+                            break
+                            ;;
+                    esac
+                done # iterate fields
+
+                initrdLine=""
+                if [ -n "$initrdField" ] ; then
+                    initrdLine="initrd "$initrdField      
+                fi
+
+cat <<MENUENTRY >> "$generated"/"$configName".cfg
+        menuentry "$menuEntryName" {
+            bootoptions="$appendField"
+            linux $linuxField \$bootoptions
+            $initrdLine
+        }
+MENUENTRY
+                ;;
+        esac
+    done <"$isosHub"/"$configName"/isolinux/isolinux.cfg # iterate menu items
+
+cat <<FOOTER >> "$generated"/"$configName".cfg
     }
   fi
 done
-EOCFG
+FOOTER
     
 }
 
@@ -68,7 +111,7 @@ echo finding isos
 for isoFile in "$mntpoint"/boot/isos/nixos-*.iso ; do
     echo "$isoFile" found
     isoName=$(basename "$isoFile")
-    isoMntPoint=~/isomounts/"$isoName"
+    isoMntPoint="$isosHub"/"$isoName"
     
     # Disabled because bsdtar has a problem with libarchive on Macos    
     if command -v 7z >/dev/null 2>&1 ; then
