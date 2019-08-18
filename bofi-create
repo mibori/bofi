@@ -32,6 +32,6 @@ if [[ -z "$size" ]] ; then
 fi
 
 pushd "$scriptdir"
-    ./makeUSB.sh $device vfat $size
-    parted $device set 1 boot on
+    ./makeUSB.sh --efi $device vfat $size
+    # parted $device set 1 boot on
 popd
