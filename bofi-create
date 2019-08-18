@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
 # Exit if there is an unbound variable or an error
-set -o nounset
 set -o errexit
 
+scriptname="${0}"
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 device=${1}
 size=${2}
 
+set -o nounset
+
 showUsage() {
 	cat <<- EOF
     Script to wipe and create multiboot usb :
-	    Example: sudo $scripname /dev/sdb 5G
+	    Example: sudo $scriptname /dev/sdb 5G
 	EOF
 }
 
